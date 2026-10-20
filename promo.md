@@ -32,7 +32,7 @@
 摄像头本地检测坐姿，一驼背，超写实仓鼠就从屏幕边探头——
 再不坐直：呲水 → 扔瓜子零食 → 直接撞你屏幕💥
 不联网不上传，开源免费👇
-github.com/<你的用户名>/posture-hamster
+github.com/connie918/posture-hamster
 
 ---
 
