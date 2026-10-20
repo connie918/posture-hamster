@@ -2,7 +2,7 @@
 
 > 坐直，不然仓鼠要出手了。
 
-一个 macOS 菜单栏小应用：用摄像头在**本机**检测坐姿，一旦你低头、驼背、凑太近，一只超写实的小仓鼠就会从屏幕边缘不定时探头出来——先呲水，再扔瓜子和零食，再不改就直接「撞」上你的屏幕。
+一个 macOS 菜单栏小应用：用摄像头在**本机**检测坐姿，一旦你低头、驼背、凑太近，一只超写实的小仓鼠就会从屏幕边缘不定时探头出来——先吐瓜子壳，再扔更多瓜子和零食，再不改就直接「撞」上你的屏幕。
 
 ![探头](docs/peek.png)
 
@@ -12,7 +12,7 @@
 
 ## 功能
 - 🐹 **随机探头**：仓鼠从左 / 右 / 上 / 下边缘随机出现
-- 📈 **逐级升级**：探头提醒 → 呲水 → 扔瓜子（越扔越多）→ 撞屏幕（玻璃挤压、雾气、裂纹、震屏）
+- 📈 **逐级升级**：探头提醒 → 吐瓜子壳 → 瓜子连发 → 零食砸屏→ 撞屏幕（玻璃挤压、雾气、裂纹、震屏）
 - 🧍 **五种坐姿信号**：低头/驼背、头前伸、靠太近、肩膀歪、身体下沉；坏姿势持续 3 秒才触发
 - 🎚️ **灵敏度菜单**：宽松 ×0.5 ～ 严格 ×2，默认「标准」
 - 🪟 **透明悬浮层**：始终置顶、鼠标可穿透、所有桌面都在；不占 Dock，只在菜单栏
@@ -50,7 +50,7 @@ npm run build:mac-x64
 
 ## English
 
-**Posture Hamster** is a tiny macOS menu-bar app that watches your posture through the webcam — entirely on-device. Slouch, and a photoreal hamster peeks out from a screen edge, then escalates: water spray → a volley of sunflower seeds & snacks → bonking into your screen.
+**Posture Hamster** is a tiny macOS menu-bar app that watches your posture through the webcam — entirely on-device. Slouch, and a photoreal hamster peeks out from a screen edge, then escalates: spitting seed shells → a growing volley of sunflower seeds & snacks → bonking into your screen.
 
 - Runs locally with MediaPipe Pose; nothing is uploaded or recorded.
 - **Calibrate first** (a window opens on first launch). Adjust sensitivity from the menu bar.
