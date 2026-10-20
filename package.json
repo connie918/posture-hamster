@@ -1,0 +1,20 @@
+{
+  "name": "posture-hamster",
+  "productName": "坐姿小仓鼠",
+  "version": "1.0.0",
+  "description": "A macOS webcam posture reminder: a photoreal hamster peeks out and escalates when you slouch.",
+  "main": "main.js",
+  "private": true,
+  "author": "Connie Huang",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:mac-arm64": "electron-packager . 坐姿小仓鼠 --platform=darwin --arch=arm64 --icon=icon.icns --out=dist --overwrite --extend-info=build/extend.plist --ignore=\"^/(docs|web|dist|promo\\.md)\"",
+    "build:mac-x64": "electron-packager . 坐姿小仓鼠 --platform=darwin --arch=x64 --icon=icon.icns --out=dist --overwrite --extend-info=build/extend.plist --ignore=\"^/(docs|web|dist|promo\\.md)\"",
+    "build": "npm run build:mac-arm64 && npm run build:mac-x64"
+  },
+  "devDependencies": {
+    "electron": "^44.9.1",
+    "@electron/packager": "^20.3.0"
+  }
+}

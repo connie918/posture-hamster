@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict>
+<key>NSCameraUsageDescription</key><string>坐姿小仓鼠需要使用摄像头在本机检测你的坐姿，画面不会上传。</string>
+<key>LSUIElement</key><true/><key>LSMinimumSystemVersion</key><string>12.0</string>
+<key>CFBundleDisplayName</key><string>坐姿小仓鼠</string></dict></plist>
