@@ -14,8 +14,9 @@ function createOverlay(){const d=screen.getPrimaryDisplay().bounds;
   webPreferences:{preload:path.join(__dirname,'preload.js'),backgroundThrottling:false}});
  overlay.setAlwaysOnTop(true,'screen-saver');overlay.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true});
  overlay.setIgnoreMouseEvents(true,{forward:true});overlay.loadURL('app://local/overlay.html'+(process.env.PH_SHOT?'?cpu':''));
- overlay.webContents.on('did-finish-load',()=>{send('sens',cfg.sens);send('sound',cfg.sound);send('pause',cfg.paused);send('debug',cfg.debug)});
- screen.on('display-metrics-changed',()=>{const b=screen.getPrimaryDisplay().bounds;overlay.setBounds(b)})}
+ overlay.webContents.on('did-finish-load',()=>{send('sens',cfg.sens);send('sound',cfg.sound);send('pause',cfg.paused);send('debug',cfg.debug);sendIns()});
+ screen.on('display-metrics-changed',()=>{const b=screen.getPrimaryDisplay().bounds;overlay.setBounds(b);sendIns()})}
+function sendIns(){const d=screen.getPrimaryDisplay(),b=d.bounds,w=d.workArea;send('insets',{t:w.y-b.y,l:w.x-b.x,b:(b.y+b.height)-(w.y+w.height),r:(b.x+b.width)-(w.x+w.width)})}
 function openCalib(){if(calib){calib.show();return}
  calib=new BrowserWindow({width:440,height:560,title:'校准坐姿',resizable:false,alwaysOnTop:true,webPreferences:{preload:path.join(__dirname,'preload.js')}});
  calib.loadURL('app://local/calib.html');calib.on('closed',()=>calib=null)}

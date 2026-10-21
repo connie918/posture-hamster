@@ -51,7 +51,7 @@ input[type=range]{accent-color:#111;width:160px}
 .pet.hop .in{animation:hop .45s ease-in-out infinite}@keyframes hop{0%,100%{transform:scale(1.04,.96)}50%{transform:translateY(-14px) scale(.97,1.03)}}
 .pet.puff .in{animation:puff .5s ease-in-out infinite}@keyframes puff{50%{transform:scale(1.07,1.02)}}
 .ground{position:absolute;left:15%;right:15%;bottom:-6px;height:18px;border-radius:50%;background:radial-gradient(rgba(0,0,0,.22),transparent 70%)}
-#crack{position:fixed;inset:0;z-index:25;pointer-events:none;transition:opacity 1s}
+#crack{position:fixed;inset:0;z-index:25;pointer-events:none}#crack canvas{position:absolute;inset:0;width:100%;height:100%;transition:opacity 1s}
 .bubble{position:fixed;z-index:31;transform:translate(-50%,-100%) scale(.6);opacity:0;background:#111;color:#fff;font-size:15px;font-weight:500;white-space:nowrap;padding:10px 16px;border-radius:16px;transition:opacity .4s var(--e),transform .4s var(--e);pointer-events:none}
 .bubble.on{opacity:1;transform:translate(-50%,-100%) scale(1)}
 html,body{background:transparent!important;overflow:hidden}.wrap,#cam,#demo{display:none!important}</style></head><body>
@@ -73,7 +73,7 @@ html,body{background:transparent!important;overflow:hidden}.wrap,#cam,#demo{disp
  </div>
 </div>
 <div id="cam" class="hide"><video id="v" playsinline muted></video><canvas id="c"></canvas></div>
-<div id="fx"></div><canvas id="crack"></canvas><div class="flash" id="flash"></div><div class="bubble" id="bub"></div>
+<div id="fx"></div><div id="crack"></div><div class="flash" id="flash"></div><div class="bubble" id="bub"></div>
 <div class="pet" id="pet"><div class="in"><div id="sw" style="position:absolute;inset:0;transform-origin:50% 90%;will-change:transform"><img id="pimg" src="assets/h-neutral.webp" alt="" style="position:absolute;inset:0"><img id="pimg2" alt="" style="position:absolute;inset:0;opacity:0"></div><div class="ground" id="gnd"></div></div></div>
 <div class="demo" id="demo"><b>DEMO</b><button data-l="1">1 吐瓜子壳</button><button data-l="2">2 扔瓜子</button><button data-l="3">3 砸零食</button><button data-l="4">4 撞屏幕</button><button class="ghost" id="dpeek">探头</button><button class="ghost" id="dgood">坐好了</button><button class="ghost" id="dchar" style="display:none">角色：仓鼠</button></div>
 <script type="module">
@@ -90,14 +90,17 @@ const pose=n=>{const u=C.img(n);if(IA.src.endsWith(u))return;IB.src=u;IB.style.o
 let sound=true,attacking=false,level=0,timer=null,peekT=null;
 const today=new Date().toDateString();let st=JSON.parse(localStorage.pc||'{}');if(st.d!==today)st={d:today,n:0};$('#cnt').textContent=st.n;
 // --- placement: square box, rotated so its bottom faces the edge; fully on-screen when shown
+let INS={t:0,r:0,b:0,l:0};
+function setInsets(o){INS=Object.assign({t:0,r:0,b:0,l:0},o||{});const c=`inset(${INS.t}px ${INS.r}px ${INS.b}px ${INS.l}px)`;$('#fx').style.clipPath=c;$('#crack').style.clipPath=c}
+{const q=new URLSearchParams(location.search).get('insets');if(q){const[t,r,b,l]=q.split(',').map(Number);setInsets({t,r,b,l})}}
 let cur={side:'bottom',S:240};
-function setPet(side,S,show,opt={}){const W=innerWidth,H=innerHeight;let x,y,a=0,dx=0,dy=0;
- if(side==='bottom'){x=opt.x??rnd(40,W-S-40);y=H-S;dy=S+40}
- if(side==='top'){x=opt.x??rnd(40,W-S-40);y=0;a=180;dy=-S-40}
- if(side==='left'){x=0;y=opt.y??rnd(80,H-S-80);a=90;dx=-S-40}
- if(side==='right'){x=W-S;y=opt.y??rnd(80,H-S-80);a=-90;dx=S+40}
- if(side==='floorL'){x=24;y=H-S;dx=-S-80}
- if(side==='floorR'){x=W-S-24;y=H-S;dx=S+80}
+function setPet(side,S,show,opt={}){const W=innerWidth-INS.r,H=innerHeight-INS.b,X0=INS.l,Y0=INS.t;let x,y,a=0,dx=0,dy=0;
+ if(side==='bottom'){x=opt.x??rnd(X0+40,W-S-40);y=H-S;dy=S+40+INS.b}
+ if(side==='top'){x=opt.x??rnd(X0+40,W-S-40);y=Y0;a=180;dy=-S-40-Y0}
+ if(side==='left'){x=X0;y=opt.y??rnd(Y0+80,H-S-80);a=90;dx=-S-40-X0}
+ if(side==='right'){x=W-S;y=opt.y??rnd(Y0+80,H-S-80);a=-90;dx=S+40+INS.r}
+ if(side==='floorL'){x=X0+24;y=H-S;dx=-S-80-X0}
+ if(side==='floorR'){x=W-S-24;y=H-S;dx=S+80+INS.r}
  $('#gnd').style.display=(side==='bottom'||side.startsWith('floor'))&&!opt.peek?'':'none';
  pet.style.transition='none';Object.assign(pet.style,{left:x+'px',top:y+'px',width:S+'px',height:S+'px'});
  pet.dataset.hid=`translate(${dx}px,${dy}px) rotate(${a}deg)`;pet.dataset.show=`translate(0,0) rotate(${a}deg)`;
@@ -144,8 +147,12 @@ function volley(l){const cfg={1:{n:[12,18],D:1600,flurry:[3,4]},2:{n:[20,30],D:2
    setTimeout(()=>spawn(src,base,l===1?{T:rnd(.35,.6),ty:rnd(innerHeight*.25,innerHeight*.75)}:{}),j*rnd(30,60))}sent+=k;
   if(l!==3)setTimeout(()=>pose('neutral'),gap*.55)},f*gap)}
 // --- procedural glass crack
-const cv=$('#crack');let cx2;
-function crack(cx,cy){const d=devicePixelRatio||1,W=innerWidth*d,H=innerHeight*d;if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}const x=cx2=cv.getContext('2d');cv.style.opacity=1;cx*=d;cy*=d;
+const cbox=$('#crack');let cx2;const MAXC=3,MAXF=2;
+function fadeOut(el,ms){if(el._gone)return;el._gone=1;el.getAnimations().forEach(a=>a.cancel());el.animate([{opacity:getComputedStyle(el).opacity},{opacity:0}],{duration:ms,fill:'forwards'}).onfinish=()=>el.remove()}
+function clearFX(ms=900){cbox.querySelectorAll('canvas').forEach(c=>fadeOut(c,ms));fx.querySelectorAll('.fog').forEach(f=>fadeOut(f,ms))}
+function crack(cx,cy){const d=devicePixelRatio||1,W=innerWidth*d,H=innerHeight*d;const cv=document.createElement('canvas');cv.width=W;cv.height=H;cbox.appendChild(cv);
+ const live=[...cbox.querySelectorAll('canvas')].filter(c=>!c._gone);if(live.length>MAXC)live.slice(0,live.length-MAXC).forEach(c=>fadeOut(c,1200));
+ const x=cx2=cv.getContext('2d');cx*=d;cy*=d;
  const segs=[];const R=Math.hypot(W,H);
  function ray(x0,y0,a,len,w,o,depth,dist){let px=x0,py=y0,r=0;while(r<len){const st=rnd(8,22)*d;r+=st;a+=rnd(-.09,.09);const nx=px+Math.cos(a)*st,ny=py+Math.sin(a)*st;const f=1-r/len;segs.push({x0:px,y0:py,x1:nx,y1:ny,w:Math.max(.35,w*f)*d,o:o*(.35+.65*f),t:dist+r});
    if(depth<3&&Math.random()<.035*(3-depth))ray(nx,ny,a+rnd(.35,.9)*(Math.random()<.5?-1:1),(len-r)*rnd(.25,.55),w*.6,o*.75,depth+1,dist+r);px=nx;py=ny}return}
@@ -170,7 +177,8 @@ const SHELL='assets/shell.webp',SEED='assets/seed.webp',SNACK=['assets/biscuit.w
 function act(l){if(l<=3){volley(l);return}
  if(l===4){bonk()}}
 function bonk(){pose('angry');say('');pet.classList.remove('hop','puff');const W=innerWidth,H=innerHeight,S=cur.S;
- const cx=W/2+rnd(-W*.06,W*.06),cy=H*.5+rnd(-H*.05,H*.05);const sc=Math.min(1.9,(H*.8)/S);
+ const WW=W-INS.l-INS.r,WH=H-INS.t-INS.b;const sc=Math.min(1.9,(WH*.78)/S,(WW*.78)/S);const half=S*sc/2+16;
+ const cx=Math.max(INS.l+half,Math.min(W-INS.r-half,INS.l+WW/2+rnd(-WW*.06,WW*.06))),cy=Math.max(INS.t+half,Math.min(H-INS.b-half,INS.t+WH*.5+rnd(-WH*.04,WH*.04)));
  const dx=cx-(cur.x+S/2),dy=cy-(cur.y+S/2),T=(x,y,s,sx=1,sy=1,r=0,rx=0)=>`translate(${x}px,${y}px) perspective(900px) rotateX(${rx}deg) rotate(${r}deg) scale(${s*sx},${s*sy})`;
  const k=[{transform:T(0,0,1),offset:0},{transform:T(dx*.15,dy*.15+30,1.05,1.06,.92),offset:.12},{transform:T(dx*.85,dy*.85,sc*.8,.96,1.05,-3),offset:.48},
   {transform:T(dx,dy,sc,1.22,.8,0,10),offset:.56},{transform:T(dx,dy+6,sc,1.16,.85,0,8),offset:.62},{transform:T(dx,dy+4,sc,1.18,.83,.6,8),offset:.7},
@@ -179,19 +187,21 @@ function bonk(){pose('angry');say('');pet.classList.remove('hop','puff');const W
  setTimeout(()=>{impact(cx,cy+S*sc*.05,S*sc)},tImp);
  a.onfinish=()=>{pet.animate([{transform:'translateY(110%)'},{transform:'translateY(0)'}],{duration:700,easing:'cubic-bezier(.16,1,.3,1)'});if(attacking)setTimeout(()=>say(pick(C.LINES[4])),500)}}
 function impact(cx,cy,size){noise(.25,160,.7,.9);noise(.6,4200,.4,.3);setTimeout(()=>noise(.4,6000,.3,.12),60);
- const sm=document.createElement('div');const w=size*.55,h=size*.42;
+ const sm=document.createElement('div');sm.className='fog';const w=size*.55,h=size*.42;
  sm.style.cssText=`left:${cx-w/2}px;top:${cy-h/2}px;width:${w}px;height:${h}px;border-radius:50%;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.55),rgba(235,238,240,.35) 45%,rgba(255,255,255,0) 70%);filter:blur(6px);mix-blend-mode:screen;backdrop-filter:blur(2px) brightness(1.05);transform:translate(0,0)`;
  sm.innerHTML=`<div style="position:absolute;left:46%;top:44%;width:8%;height:6%;border-radius:50%;background:rgba(120,110,105,.12);filter:blur(3px)"></div><div style="position:absolute;left:30%;top:68%;width:9%;height:7%;border-radius:50%;background:rgba(150,120,120,.1);filter:blur(3px)"></div><div style="position:absolute;left:61%;top:68%;width:9%;height:7%;border-radius:50%;background:rgba(150,120,120,.1);filter:blur(3px)"></div>`;
- fx.appendChild(sm);sm.animate([{opacity:0},{opacity:1,offset:.04},{opacity:.9,offset:.5},{opacity:0}],{duration:9000,fill:'forwards'}).onfinish=()=>sm.remove();
+ fx.appendChild(sm);{const live=[...fx.querySelectorAll('.fog')].filter(f=>!f._gone);if(live.length>MAXF)live.slice(0,live.length-MAXF).forEach(f=>fadeOut(f,400))}sm.animate([{opacity:0},{opacity:1,offset:.05},{opacity:.75,offset:.35},{opacity:0}],{duration:rnd(1600,2400),easing:'ease-out',fill:'forwards'}).onfinish=()=>sm.remove();
  crack(cx,cy);dshake()}
 function dshake(){const k=[];const A=14;for(let i=0;i<=14;i++){const d=Math.exp(-i/3.2)*A*(i%2?-1:1);k.push({transform:`translate(${d*.8}px,${d*.5}px)`})}k.push({transform:'translate(0,0)'});document.body.animate(k,{duration:700,easing:'linear'})}
 function attack(l){attacking=true;level=l;clearInterval(timer);clearTimeout(peekT);pet.className='pet';
- const big=l===4?300:260;setPet(pick(['bottom','floorL','floorR']),big,true);pose(l>=3?'angry':'neutral');squeak();setTimeout(()=>say(pick(C.LINES[l])),500);
- setTimeout(()=>act(l),700);timer=setInterval(()=>act(l),l===4?4200:l===1?2800:3400);
+ const big=l===4?300:260;const vis=!!pet.dataset.show&&pet.style.transform===pet.dataset.show;let lag=0;
+ if(vis){pet.getAnimations().forEach(a=>a.cancel());say('');pet.style.transition='transform .42s cubic-bezier(.55,0,.85,.35)';pet.style.transform=pet.dataset.hid;lag=440}
+ setTimeout(()=>{if(!attacking||level!==l)return;setPet(pick(['bottom','floorL','floorR']),big,true);pose(l>=3?'angry':'neutral');squeak()},lag);setTimeout(()=>say(pick(C.LINES[l])),500+lag);
+ setTimeout(()=>act(l),900+lag);timer=setInterval(()=>act(l),l===4?4200:l===1?2800:3400);
  if(!window.DEMO){st.n++;localStorage.pc=JSON.stringify(st);$('#cnt').textContent=st.n;window.api&&api.count(st.n)}
  $('#lvl').textContent=`惩罚等级 ${l} · 保持坐姿 20 秒自动清零`;
  if(document.hidden&&'Notification'in window&&Notification.permission==='granted')new Notification('吱！坐姿不对！',{body:pick(C.LINES[l])})}
-function calm(){if(!attacking)return;attacking=false;clearInterval(timer);pet.className='pet';pet.getAnimations().forEach(a=>a.cancel());pose('good');pet.style.transform=pet.dataset.show;say(pick(C.NICE));cv.style.opacity=0;setTimeout(()=>{if(!attacking)cv.getContext('2d').clearRect(0,0,cv.width,cv.height)},1100);setTimeout(()=>{if(!attacking)hide()},2600)}
+function calm(){if(!attacking)return;attacking=false;clearInterval(timer);pet.className='pet';pet.getAnimations().forEach(a=>a.cancel());pose('good');pet.style.transform=pet.dataset.show;say(pick(C.NICE));clearFX(900);setTimeout(()=>{if(!attacking)hide()},2600)}
 // --- demo
 const Q=new URLSearchParams(location.search);
 if(Q.has('demo')){window.DEMO=1;$('#demo').style.display='flex';document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{calm();setTimeout(()=>attack(+b.dataset.l),60)});$('#dpeek').onclick=peek;$('#dgood').onclick=calm;
@@ -243,6 +253,7 @@ window.api&&api.count(st.n);
 window.H={attack:l=>{calm();setTimeout(()=>attack(l),60)},peek,calm,
  sound:v=>{sound=v},sens:v=>{sensLv=v},debug:v=>setDebug(v),
  start:()=>$('#start').onclick(),calibrate:()=>startCalib(),pause:v=>{window.PAUSED=v;if(v)calm()}};
+H.insets=v=>setInsets(v);
 H.recal=()=>{base=null;localStorage.removeItem('pcBase');api.needCalib(true)};
 api.needCalib(!base);
 api.onCmd((c,a)=>{const r=H[c]&&H[c](a);});
